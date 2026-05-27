@@ -1160,11 +1160,73 @@ h3 {
 </section>
 
 <!-- ==========================================
-     SLIDE 13: 架構揭秘
+     SLIDE 13: 資料夾結構設定
      ========================================== -->
 <section class="slide content-slide" data-slide="12">
   <div class="grid-bg"></div>
   <span class="section-num">13</span>
+  <div class="slide-content">
+    <div class="slide-title-row reveal">
+      <span class="tag">📁 資料夾設定</span>
+      <h2>建立你的 <span class="accent-text">AI 工作資料夾</span></h2>
+      <p style="font-size:var(--body-size); color:var(--text-secondary); margin-top:0.3em;">三條黃金法則 — AI 才能準確找到檔案、放對位置</p>
+    </div>
+    <div class="two-col" style="margin-top: var(--content-gap); align-items:stretch;">
+
+      <!-- 左：資料夾樹 -->
+      <div class="card card-glow reveal" style="font-family:var(--font-mono); font-size:clamp(0.6rem,1vw,0.85rem); line-height:1.9; border-color:rgba(0,255,204,0.2);">
+        <div style="font-size:var(--small-size); font-weight:700; color:var(--accent-cyan); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.6em;">📁 Demo_sharing/</div>
+        <div style="color:var(--text-secondary); padding-left:0.5em;">
+          <div><span style="color:rgba(0,255,204,0.4);">├──</span> <span style="color:var(--accent-cyan);">📁 01_會計_財務自動化/</span></div>
+          <div style="padding-left:1.4em;"><span style="color:rgba(0,255,204,0.3);">├──</span> <span style="color:var(--text-primary);">📂 Input_待處理單據/</span> <span style="color:rgba(0,255,204,0.5); font-size:0.85em;">← 丟入原始檔</span></div>
+          <div style="padding-left:1.4em;"><span style="color:rgba(0,255,204,0.3);">└──</span> <span style="color:var(--text-primary);">📂 Output_核對總表/</span> <span style="color:rgba(0,255,204,0.5); font-size:0.85em;">← AI 輸出到這裡</span></div>
+
+          <div style="margin-top:0.4em;"><span style="color:rgba(0,255,204,0.4);">├──</span> <span style="color:var(--accent-cyan);">📁 02_秘書_行政排班/</span></div>
+          <div style="padding-left:1.4em;"><span style="color:rgba(0,255,204,0.3);">├──</span> <span style="color:var(--text-primary);">📂 01_總表/</span></div>
+          <div style="padding-left:1.4em;"><span style="color:rgba(0,255,204,0.3);">├──</span> <span style="color:var(--text-primary);">📂 02_模板/</span></div>
+          <div style="padding-left:1.4em;"><span style="color:rgba(0,255,204,0.3);">└──</span> <span style="color:var(--text-primary);">📂 03_待發送通知/</span></div>
+
+          <div style="margin-top:0.4em;"><span style="color:rgba(0,255,204,0.4);">└──</span> <span style="color:var(--accent-cyan);">📁 03_老師_教案提煉/</span></div>
+          <div style="padding-left:1.4em;"><span style="color:rgba(0,255,204,0.3);">├──</span> <span style="color:var(--text-primary);">📂 Input_原始教案/</span></div>
+          <div style="padding-left:1.4em;"><span style="color:rgba(0,255,204,0.3);">└──</span> <span style="color:var(--text-primary);">📂 Output_教材包/</span></div>
+        </div>
+      </div>
+
+      <!-- 右：三條黃金法則 -->
+      <div style="display:flex; flex-direction:column; gap:var(--element-gap);">
+        <div class="card card-glow reveal" style="border-color:rgba(0,255,204,0.2);">
+          <div style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.4em;">
+            <span style="font-family:var(--font-display); font-size:clamp(1.2rem,2vw,1.6rem); font-weight:700; color:var(--accent-cyan);">01</span>
+            <h3 style="font-size:clamp(0.85rem,1.5vw,1.1rem);">數字前綴排序</h3>
+          </div>
+          <p style="font-size:var(--small-size); color:var(--text-secondary); line-height:1.5;">用 <span style="color:var(--accent-cyan); font-weight:600;">01_ 02_ 03_</span> 開頭，讓資料夾自動按順序排列，Prompt 描述時 AI 一眼認出步驟順序。</p>
+        </div>
+        <div class="card card-glow reveal" style="border-color:rgba(0,255,204,0.2);">
+          <div style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.4em;">
+            <span style="font-family:var(--font-display); font-size:clamp(1.2rem,2vw,1.6rem); font-weight:700; color:var(--accent-cyan);">02</span>
+            <h3 style="font-size:clamp(0.85rem,1.5vw,1.1rem);">Input / Output 分開</h3>
+          </div>
+          <p style="font-size:var(--small-size); color:var(--text-secondary); line-height:1.5;">原始檔放 <span style="color:var(--accent-cyan); font-weight:600;">Input</span>，結果放 <span style="color:var(--accent-cyan); font-weight:600;">Output</span>。AI 讀哪裡、寫哪裡一目了然，避免覆蓋原始檔。</p>
+        </div>
+        <div class="card card-glow reveal" style="border-color:rgba(255,0,170,0.2);">
+          <div style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.4em;">
+            <span style="font-family:var(--font-display); font-size:clamp(1.2rem,2vw,1.6rem); font-weight:700; color:var(--accent-magenta);">03</span>
+            <h3 style="font-size:clamp(0.85rem,1.5vw,1.1rem);">避免空格與特殊符號</h3>
+          </div>
+          <p style="font-size:var(--small-size); color:var(--text-secondary); line-height:1.5;">空格容易讓 AI 斷句出錯，改用 <span style="color:var(--accent-magenta); font-weight:600;">_</span> 底線連接。括號、斜線、星號等符號一律避免。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 14: 架構揭秘
+     ========================================== -->
+<section class="slide content-slide" data-slide="13">
+  <div class="grid-bg"></div>
+  <span class="section-num">14</span>
   <div class="slide-content" style="align-items:center;">
     <div class="slide-title-row reveal" style="text-align:center; width:100%;">
       <span class="tag">🔮 架構揭秘</span>
