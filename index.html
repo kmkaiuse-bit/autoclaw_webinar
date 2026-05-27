@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AutoClaw 實戰展示 ─ 讓 AI 成為你的專屬桌面助理</title>
+
+<!-- Fonts: Clash Display + Satoshi from Fontshare -->
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@400,500,700&display=swap"/>
+
+<style>
+/* ===========================================
+   CSS CUSTOM PROPERTIES — NEON CYBER THEME
+   =========================================== */
+:root {
+  --bg-primary: #0a0f1c;
+  --bg-secondary: #0e1528;
+  --bg-card: rgba(15, 22, 40, 0.85);
+  --text-primary: #e8edf5;
+  --text-secondary: #8892a4;
+  --accent-cyan: #00ffcc;
+  --accent-magenta: #ff00aa;
+  --accent-blue: #4361ee;
+  --glow-cyan: 0 0 20px rgba(0,255,204,0.4), 0 0 60px rgba(0,255,204,0.15);
+  --glow-magenta: 0 0 20px rgba(255,0,170,0.4), 0 0 60px rgba(255,0,170,0.15);
+  --glow-subtle: 0 0 10px rgba(0,255,204,0.2);
+  --font-display: 'Clash Display', sans-serif;
+  --font-body: 'Satoshi', sans-serif;
+  --font-mono: 'Satoshi', monospace;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-normal: 0.6s;
+}
+
+/* ===========================================
+   VIEWPORT FITTING: MANDATORY BASE STYLES
+   =========================================== */
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+.slide {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-height: 100%;
+  overflow: hidden;
+  padding: clamp(1rem, 4vw, 4rem);
+  position: relative;
+  z-index: 2;
+}
+
+:root {
+  --title-size: clamp(1.5rem, 5vw, 4rem);
+  --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+  --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+  --body-size: clamp(0.7rem, 1.3vw, 1.05rem);
+  --small-size: clamp(0.6rem, 1vw, 0.85rem);
+  --slide-padding: clamp(1rem, 4vw, 4rem);
+  --content-gap: clamp(0.5rem, 2vw, 2rem);
+  --element-gap: clamp(0.25rem, 1vw, 1rem);
+}
+
+@media (max-height: 700px) {
+  :root {
+    --slide-padding: clamp(0.75rem, 3vw, 2rem);
+    --content-gap: clamp(0.4rem, 1.5vw, 1rem);
+    --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+    --h2-size: clamp(1rem, 3vw, 1.75rem);
+    --body-size: clamp(0.65rem, 1.2vw, 0.9rem);
+  }
+}
+@media (max-height: 600px) {
+  :root {
+    --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+    --content-gap: clamp(0.3rem, 1vw, 0.75rem);
+    --title-size: clamp(1.1rem, 4vw, 2rem);
+    --body-size: clamp(0.6rem, 1.1vw, 0.85rem);
+  }
+  .nav-dots, .keyboard-hint, .decorative { display: none; }
+}
+@media (max-height: 500px) {
+  :root {
+    --slide-padding: clamp(0.4rem, 2vw, 1rem);
+    --title-size: clamp(1rem, 3.5vw, 1.5rem);
+    --h2-size: clamp(0.9rem, 2.5vw, 1.25rem);
+    --body-size: clamp(0.55rem, 1vw, 0.8rem);
+  }
+}
+@media (max-width: 600px) {
+  :root { --title-size: clamp(1.25rem, 7vw, 2.5rem); }
+  .grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.2s !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
+/* ===========================================
+   PRINT / PDF EXPORT STYLES
+   Chrome: Ctrl+P → More settings → A4 Landscape → Save as PDF
+   =========================================== */
+@media print {
+  @page {
+    size: 25.6cm 14.4cm landscape;   /* 1280×720 @ 50dpi ≈ 16:9 */
+    margin: 0;
+  }
+  html, body {
+    height: auto;
+    overflow: visible;
+    scroll-snap-type: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
+  }
+  #particles, .progress-bar, .nav-dots, .keyboard-hint {
+    display: none !important;
+  }
+  .slide {
+    width: 100vw;
+    height: 100vh;
+    min-height: unset;
+    page-break-after: always;
+    break-after: page;
+    overflow: hidden;
+    position: relative;
+  }
+  .slide:last-of-type {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+  /* Force reveal animations to show immediately */
+  .reveal, .reveal-scale, .reveal-glow {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+  /* Ensure backgrounds print */
+  .content-slide {
+    background: var(--bg-primary) !important;
+  }
+  .grid-bg {
+    display: block !important;
+  }
+}
+
+/* ===========================================
+   GRID BACKGROUND OVERLAY
+   =========================================== */
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,204,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,204,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ===========================================
+   PARTICLE CANVAS
+   =========================================== */
+#particles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ===========================================
+   PROGRESS BAR
+   =========================================== */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+  box-shadow: var(--glow-cyan);
+  z-index: 100;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+/* ===========================================
+   NAVIGATION DOTS
+   =========================================== */
+.nav-dots {
+  position: fixed;
+  right: clamp(0.5rem, 2vw, 1.5rem);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.nav-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent-cyan);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.nav-dot.active {
+  background: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0,255,204,0.6);
+  transform: scale(1.3);
+}
+
+/* ===========================================
+   SECTION NUMBER
+   =========================================== */
+.section-num {
+  position: absolute;
+  top: clamp(0.8rem, 2vw, 1.5rem);
+  left: clamp(1rem, 4vw, 4rem);
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 700;
+  color: rgba(0,255,204,0.06);
+  z-index: 1;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ===========================================
+   REVEAL ANIMATIONS
+   =========================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity var(--duration-normal) var(--ease-out-expo),
+              transform var(--duration-normal) var(--ease-out-expo);
+}
+.visible .reveal { opacity: 1; transform: translateY(0); }
+.visible .reveal:nth-child(1) { transition-delay: 0.05s; }
+.visible .reveal:nth-child(2) { transition-delay: 0.12s; }
+.visible .reveal:nth-child(3) { transition-delay: 0.19s; }
+.visible .reveal:nth-child(4) { transition-delay: 0.26s; }
+.visible .reveal:nth-child(5) { transition-delay: 0.33s; }
+.visible .reveal:nth-child(6) { transition-delay: 0.4s; }
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
+}
+.visible .reveal-scale { opacity: 1; transform: scale(1); }
+
+.reveal-glow {
+  opacity: 0;
+  filter: blur(8px);
+  transition: opacity 0.8s ease, filter 0.8s ease;
+}
+.visible .reveal-glow { opacity: 1; filter: blur(0); }
+
+/* ===========================================
+   TYPOGRAPHY
+   =========================================== */
+h1 {
+  font-family: var(--font-display);
+  font-size: var(--title-size);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+h2 {
+  font-family: var(--font-display);
+  font-size: var(--h2-size);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+h3 {
+  font-family: var(--font-display);
+  font-size: var(--h3-size);
+  font-weight: 600;
+  line-height: 1.3;
+}
+.accent-text { color: var(--accent-cyan); }
+.magenta-text { color: var(--accent-magenta); }
+.neon-glow {
+  text-shadow: var(--glow-cyan);
+}
+
+/* ===========================================
+   LAYOUT HELPERS
+   =========================================== */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1rem, 3vw, 3rem);
+  align-items: start;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: clamp(0.8rem, 2vw, 2rem);
+  align-items: start;
+}
+.card {
+  background: var(--bg-card);
+  border: 1px solid rgba(0,255,204,0.12);
+  border-radius: 12px;
+  padding: clamp(0.8rem, 2vw, 1.8rem);
+  backdrop-filter: blur(10px);
+}
+.card-glow {
+  box-shadow: 0 0 30px rgba(0,255,204,0.05), inset 0 1px 0 rgba(0,255,204,0.08);
+}
+.tag {
+  display: inline-block;
+  background: rgba(0,255,204,0.12);
+  color: var(--accent-cyan);
+  font-size: var(--small-size);
+  font-weight: 500;
+  padding: 0.2em 0.7em;
+  border-radius: 20px;
+  border: 1px solid rgba(0,255,204,0.2);
+  margin-bottom: var(--element-gap);
+}
+.tag-magenta {
+  background: rgba(255,0,170,0.12);
+  color: var(--accent-magenta);
+  border-color: rgba(255,0,170,0.2);
+}
+.bullet-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.35rem, 0.8vh, 0.7rem);
+}
+.bullet-list li {
+  font-size: var(--body-size);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  padding-left: 1.2em;
+  position: relative;
+}
+.bullet-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px rgba(0,255,204,0.5);
+}
+
+/* ===========================================
+   CODE BLOCK (PROMPT)
+   =========================================== */
+.prompt-block {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(0,255,204,0.15);
+  border-left: 3px solid var(--accent-cyan);
+  border-radius: 8px;
+  padding: clamp(0.6rem, 1.5vw, 1.2rem);
+  font-size: clamp(0.55rem, 0.95vw, 0.8rem);
+  font-family: var(--font-mono);
+  line-height: 1.6;
+  color: var(--text-secondary);
+  overflow: hidden;
+  max-height: min(30vh, 180px);
+  position: relative;
+}
+.prompt-block::before {
+  content: '⚡ Prompt';
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(0.55rem, 0.9vw, 0.75rem);
+  font-weight: 700;
+  color: var(--accent-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5em;
+  text-shadow: 0 0 10px rgba(0,255,204,0.4);
+}
+
+/* ===========================================
+   SLIDE-SPECIFIC STYLES
+   =========================================== */
+
+/* --- Slide 1: Title --- */
+.title-slide {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: radial-gradient(ellipse at 50% 40%, rgba(0,255,204,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, rgba(255,0,170,0.06) 0%, transparent 50%),
+              var(--bg-primary);
+}
+.title-slide h1 {
+  font-size: clamp(2rem, 6vw, 5rem);
+  background: linear-gradient(135deg, var(--accent-cyan), #ffffff, var(--accent-magenta));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.title-slide .subtitle {
+  font-size: clamp(0.9rem, 2vw, 1.4rem);
+  color: var(--text-secondary);
+  margin-top: var(--content-gap);
+  font-weight: 400;
+}
+
+/* --- Content slides --- */
+.content-slide {
+  background: radial-gradient(ellipse at 30% 50%, rgba(0,255,204,0.04) 0%, transparent 60%),
+              radial-gradient(ellipse at 90% 80%, rgba(255,0,170,0.03) 0%, transparent 50%),
+              var(--bg-primary);
+}
+.slide-title-row {
+  margin-bottom: clamp(0.5rem, 1.5vw, 1.5rem);
+}
+.slide-title-row .tag { margin-right: 0.5em; }
+.key-point {
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
+.highlight-box {
+  background: linear-gradient(135deg, rgba(0,255,204,0.08), rgba(255,0,170,0.06));
+  border: 1px solid rgba(0,255,204,0.15);
+  border-radius: 10px;
+  padding: clamp(0.6rem, 1.5vw, 1.2rem);
+  margin-top: var(--element-gap);
+}
+.highlight-box p {
+  font-size: var(--body-size);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* --- Scenario cards (slides 3-5) --- */
+.scenario-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(0.6rem, 1.5vw, 1.5rem);
+}
+.scenario-left, .scenario-right {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.4rem, 1vh, 0.8rem);
+}
+.io-row {
+  display: flex;
+  gap: clamp(0.5rem, 1vw, 1rem);
+  align-items: stretch;
+}
+.io-item {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid rgba(0,255,204,0.1);
+  border-radius: 8px;
+  padding: clamp(0.5rem, 1.2vw, 1rem);
+}
+.io-label {
+  font-size: clamp(0.55rem, 0.9vw, 0.75rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.3em;
+}
+.io-label.input-label { color: var(--accent-blue); }
+.io-label.output-label { color: var(--accent-cyan); }
+.io-item p {
+  font-size: clamp(0.6rem, 1vw, 0.85rem);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* --- Slide 6: SOP Steps --- */
+.sop-container {
+  display: flex;
+  gap: clamp(0.8rem, 2vw, 2rem);
+  align-items: stretch;
+  margin-top: clamp(0.5rem, 1.5vw, 1.5rem);
+}
+.sop-step {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid rgba(0,255,204,0.12);
+  border-radius: 12px;
+  padding: clamp(0.8rem, 2vw, 1.8rem);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.sop-step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+}
+.step-number {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  color: rgba(0,255,204,0.15);
+  line-height: 1;
+}
+.step-title {
+  font-family: var(--font-display);
+  font-size: clamp(0.9rem, 1.8vw, 1.3rem);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0.3em 0;
+}
+.step-desc {
+  font-size: var(--body-size);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* --- Slide 7: Architecture --- */
+.arch-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(0,255,204,0.12);
+  border-radius: 14px;
+  padding: clamp(1rem, 2.5vw, 2rem);
+  position: relative;
+  overflow: hidden;
+}
+.arch-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+}
+.arch-icon {
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  margin-bottom: 0.3em;
+}
+.arch-title {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  font-weight: 700;
+  color: var(--accent-cyan);
+  margin-bottom: 0.3em;
+  text-shadow: var(--glow-subtle);
+}
+.arch-desc {
+  font-size: var(--body-size);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.vibe-coding-note {
+  margin-top: clamp(0.5rem, 1.5vw, 1.2rem);
+  font-size: var(--small-size);
+  color: var(--text-secondary);
+  text-align: center;
+  opacity: 0.8;
+}
+
+/* ===========================================
+   KEYBOARD HINT
+   =========================================== */
+.keyboard-hint {
+  position: fixed;
+  bottom: clamp(0.5rem, 1.5vw, 1.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(0.5rem, 0.8vw, 0.7rem);
+  color: rgba(255,255,255,0.2);
+  z-index: 50;
+  pointer-events: none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Particle Canvas Background -->
+<canvas id="particles"></canvas>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Navigation Dots -->
+<nav class="nav-dots" id="navDots"></nav>
+
+<!-- Keyboard Hint -->
+<div class="keyboard-hint">← → 或 Space 切換投影片</div>
+
+<!-- ==========================================
+     SLIDE 1: 開場 — AI 的下一步在哪裡？
+     ========================================== -->
+<section class="slide title-slide" data-slide="0">
+  <div class="grid-bg"></div>
+  <div class="slide-content" style="align-items:center; text-align:center;">
+    <div class="reveal-glow" style="margin-bottom: var(--content-gap);">
+      <h1>讓 AI 成為你的<br/>專屬桌面助理</h1>
+    </div>
+    <p class="subtitle reveal" style="transition-delay:0.2s;">AutoClaw 實戰展示</p>
+    <div class="reveal" style="transition-delay:0.4s; margin-top: clamp(1rem,3vw,3rem);">
+      <div style="display:flex; gap: clamp(0.5rem,1.5vw,1rem); justify-content:center; flex-wrap:wrap;">
+        <span class="tag">🔒 本地運行</span>
+        <span class="tag tag-magenta">⚡ 跨軟體操作</span>
+        <span class="tag">🤖 桌面代理</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 2: AI Agent 兩大方向
+     ========================================== -->
+<section class="slide content-slide" data-slide="1">
+  <div class="grid-bg"></div>
+  <span class="section-num">02</span>
+  <div class="slide-content">
+    <div class="slide-title-row reveal">
+      <span class="tag">知識點 1</span>
+      <h2>AI Agent <span class="accent-text">兩大方向</span></h2>
+      <p style="font-size:var(--body-size); color:var(--text-secondary); margin-top:0.3em;">同一個目標，兩種截然不同的技術路徑</p>
+    </div>
+    <div class="two-col" style="margin-top: var(--content-gap);">
+      <div class="card card-glow reveal" style="border-color: rgba(255,0,170,0.25);">
+        <div style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.5em;">
+          <span style="font-size:1.5em;">🖱️</span>
+          <h3 style="color:var(--accent-magenta);">方向 A：模仿人操作</h3>
+        </div>
+        <div class="tag tag-magenta" style="margin-bottom:0.6em;">Browser Automation</div>
+        <ul class="bullet-list">
+          <li>控制瀏覽器或桌面軟件</li>
+          <li>點擊、填表、截圖 — 像人一樣操作</li>
+          <li>優點：<span style="color:var(--text-primary);">無需 API，任何網站都能用</span></li>
+          <li>工具：<span style="color:var(--accent-magenta); font-weight:600;">AutoClaw、Claude in Chrome</span></li>
+        </ul>
+      </div>
+      <div class="card card-glow reveal" style="border-color: rgba(0,255,204,0.25);">
+        <div style="display:flex; align-items:center; gap:0.5em; margin-bottom:0.5em;">
+          <span style="font-size:1.5em;">⚡</span>
+          <h3 class="accent-text">方向 B：API / Code</h3>
+        </div>
+        <div class="tag" style="margin-bottom:0.6em;">API Connection</div>
+        <ul class="bullet-list">
+          <li>直接對接系統後台 API</li>
+          <li>不依賴 UI，速度更快更穩定</li>
+          <li>優點：<span style="color:var(--text-primary);">可批量、可排程、不受介面變化影響</span></li>
+          <li>工具：<span style="color:var(--accent-cyan); font-weight:600;">Gmail MCP、Calendar MCP、Custom Skills</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="highlight-box reveal" style="margin-top: var(--element-gap);">
+      <p style="text-align:center;">💡 兩者可<span class="key-point">互補配合</span>：AutoClaw 批量生成 PDF → Claude Desktop + Gmail API Skill 批量發送</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 3: 自動化哲學 — 人機協作
+     ========================================== -->
+<section class="slide content-slide" data-slide="2">
+  <div class="grid-bg"></div>
+  <span class="section-num">03</span>
+  <div class="slide-content">
+    <div class="slide-title-row reveal">
+      <span class="tag">自動化哲學</span>
+      <h2>人機協作</h2>
+    </div>
+    <div class="two-col" style="margin-top: var(--content-gap);">
+      <div style="display:flex; flex-direction:column; gap: var(--element-gap);">
+        <div class="card card-glow reveal">
+          <h3 style="color: var(--accent-magenta);">🚫 拒絕失控</h3>
+          <p style="font-size:var(--body-size); color:var(--text-secondary); line-height:1.5; margin-top:0.3em;">不讓 AI 直接發送郵件或發布最終文件。</p>
+        </div>
+        <div class="card card-glow reveal">
+          <h3 class="accent-text">🤖 AI 負責「苦力」</h3>
+          <p style="font-size:var(--body-size); color:var(--text-secondary); line-height:1.5; margin-top:0.3em;">批量抓取數據、格式轉換、生成草稿。</p>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap: var(--element-gap);">
+        <div class="card card-glow reveal">
+          <h3 class="accent-text">👤 人類負責「把關」</h3>
+          <p style="font-size:var(--body-size); color:var(--text-secondary); line-height:1.5; margin-top:0.3em;">檢閱產出結果（如黃色標記的異常金額），確認後再發送。</p>
+        </div>
+        <div class="highlight-box reveal">
+          <p>✅ <span class="key-point">保留絕對控制權</span>，同時讓行政效率提升 <span class="key-point neon-glow">10 倍</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 4: Prompt 方法論 — TCREI + RSTI
+     ========================================== -->
+<section class="slide content-slide" data-slide="3">
+  <div class="grid-bg"></div>
+  <span class="section-num">04</span>
+  <div class="slide-content">
+    <div class="slide-title-row reveal">
+      <span class="tag">知識點 2</span>
+      <h2>寫好 Prompt 的方法論</h2>
+      <p style="font-size:var(--body-size); color:var(--text-secondary); margin-top:0.3em;"><span class="accent-text">TCREI</span> 起稿第一版 &nbsp;·&nbsp; <span class="magenta-text">RSTI</span> 卡關時自行迭代</p>
+    </div>
+    <div class="two-col" style="margin-top: var(--content-gap);">
+
+      <!-- TCREI 左欄 -->
+      <div class="card card-glow reveal" style="border-color:rgba(0,255,204,0.25);">
+        <div style="display:flex; align-items:center; gap:0.6em; margin-bottom:0.6em;">
+          <div style="font-family:var(--font-display); font-size:clamp(1.2rem,2.5vw,1.8rem); font-weight:700; color:var(--accent-cyan); text-shadow:var(--glow-cyan); letter-spacing:0.05em;">TCREI</div>
+          <div><div style="font-size:var(--small-size); color:var(--text-secondary);">生成第一版 Prompt</div></div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:clamp(0.3rem,0.7vh,0.55rem);">
+          <div style="font-size:var(--body-size); line-height:1.4;"><span style="font-family:var(--font-display); font-weight:700; color:var(--accent-cyan); font-size:1.1em;">T</span><span style="color:var(--text-secondary);">ask</span><span style="color:var(--text-primary);"> — 你要什麼結果？目標是什麼？</span></div>
+          <div style="font-size:var(--body-size); line-height:1.4;"><span style="font-family:var(--font-display); font-weight:700; color:var(--accent-cyan); font-size:1.1em;">C</span><span style="color:var(--text-secondary);">ontext</span><span style="color:var(--text-primary);"> — 背景、角色、使用場景</span></div>
+          <div style="font-size:var(--body-size); line-height:1.4;"><span style="font-family:var(--font-display); font-weight:700; color:var(--accent-cyan); font-size:1.1em;">R</span><span style="color:var(--text-secondary);">eferences</span><span style="color:var(--text-primary);"> — 給例子、格式樣本、參考資料</span></div>
+          <div style="font-size:var(--body-size); line-height:1.4;"><span style="font-family:var(--font-display); font-weight:700; color:var(--accent-cyan); font-size:1.1em;">E</span><span style="color:var(--text-secondary);">valuate</span><span style="color:var(--text-primary);"> — 跑一次，找出不對的地方</span></div>
+          <div style="font-size:var(--body-size); line-height:1.4;"><span style="font-family:var(--font-display); font-weight:700; color:var(--accent-cyan); font-size:1.1em;">I</span><span style="color:var(--text-secondary);">terate</span><span style="color:var(--text-primary);"> — 修改 Prompt，重新測試</span></div>
+        </div>
+      </div>
+
+      <!-- RSTI 右欄 -->
+      <div class="card card-glow reveal" style="border-color:rgba(255,0,170,0.25);">
+        <div style="display:flex; align-items:center; gap:0.6em; margin-bottom:0.6em;">
+          <div style="font-family:var(--font-display); font-size:clamp(1.2rem,2.5vw,1.8rem); font-weight:700; color:var(--accent-magenta); text-shadow:var(--glow-magenta); letter-spacing:0.05em;">RSTI</div>
+          <div><div style="font-size:var(--small-size); color:var(--text-secondary);">卡關時自行迭代</div></div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:clamp(0.3rem,0.7vh,0.55rem);">
+          <div style="font-size:var(--body-size); line-height:1.4;"><span style="font-family:var(--font-display); font-weight:700; color:var(--accent-magenta); font-size:1.1em;">R</span><span style="color:var(--text-secondary);">evisit</span><span style="color:var(--text-primary);"> — 重看 Task，表達清楚了嗎？</span></div>
+          <div style="font-size:var(--body-size); line-height:1.4;"><span style="font-family:var(--font-display); font-weight:700; color:var(--accent-magenta); font-size:1.1em;">S</span><span style="color:var(--text-secondary);">eparate</span><span style="color:var(--text-primary);"> — 把複雜任務拆成多個步驟</span></div>
+          <div style="font-size:var(--body-size); line-height:1.4;"><span style="font-family:var(--font-display); font-weight:700; color:var(--accent-magenta); font-size:1.1em;">T</span><span style="color:var(--text-secondary);">ry</span><span style="color:var(--text-primary);"> — 換角度、換例子、換描述方式</span></div>
+          <div style="font-size:var(--body-size); line-height:1.4;"><span style="font-family:var(--font-display); font-weight:700; color:var(--accent-magenta); font-size:1.1em;">I</span><span style="color:var(--text-secondary);">ntroduce constraints</span><span style="color:var(--text-primary);"> — 加限制條件：格式、長度、語言、禁止事項</span></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="highlight-box reveal" style="margin-top:var(--element-gap);">
+      <p style="text-align:center;">💡 今天所有 Demo 的 Prompt 都是用 <span class="accent-text" style="font-weight:700;">TCREI</span> 設計的 &nbsp;·&nbsp; 遇到問題就用 <span class="magenta-text" style="font-weight:700;">RSTI</span> 改</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 5: 財務對帳自動化
+     ========================================== -->
+<section class="slide content-slide" data-slide="4">
+  <div class="grid-bg"></div>
+  <span class="section-num">05</span>
+  <div class="slide-content">
+    <div class="slide-title-row reveal">
+      <span class="tag">AutoClaw 實戰一</span>
+      <h2>財務對帳自動化 <span style="color:var(--text-secondary); font-size:0.6em; font-weight:400;">針對會計</span></h2>
+    </div>
+    <div class="scenario-grid" style="margin-top: var(--element-gap);">
+      <div class="scenario-left">
+        <div class="card reveal">
+          <h3 style="color:var(--accent-magenta); font-size:clamp(0.8rem,1.6vw,1.1rem);">😤 日常痛點</h3>
+          <p style="font-size:var(--small-size); color:var(--text-secondary); line-height:1.5; margin-top:0.3em;">格式不一的學費收據與採購單，需耗費大量眼力核對並手動輸入 Excel。</p>
+        </div>
+        <div class="io-row reveal">
+          <div class="io-item">
+            <div class="io-label input-label">📥 輸入</div>
+            <p>裝滿 PDF/圖檔憑證的資料夾</p>
+          </div>
+          <div class="io-item">
+            <div class="io-label output-label">📤 輸出</div>
+            <p>自動填寫的財務彙總 Excel 表</p>
+          </div>
+        </div>
+        <div class="highlight-box reveal">
+          <p>👀 <span class="key-point">觀眾看點：</span>告別手動 Key-in，釋放財務人員專注於異常審查。</p>
+        </div>
+      </div>
+      <div class="scenario-right">
+        <div class="prompt-block reveal" style="max-height: min(50vh, 320px);">
+請讀取以下資料夾中的所有單據檔案：
+C:\Users\kmksy\Desktop\HKIT\Demo_sharing\01_會計_財務自動化\Input_待處理單據
+
+提取每張憑證的關鍵數據（如日期、金額、項目），
+並填寫至以下 Excel 彙總表：
+C:\Users\kmksy\Desktop\HKIT\Demo_sharing\01_會計_財務自動化\Output_核對總表
+
+完成後請通知我。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 6: 行政文件批量生成
+     ========================================== -->
+<section class="slide content-slide" data-slide="4">
+  <div class="grid-bg"></div>
+  <span class="section-num">06</span>
+  <div class="slide-content">
+    <div class="slide-title-row reveal">
+      <span class="tag">AutoClaw 實戰二</span>
+      <h2>行政文件批量生成 <span style="color:var(--text-secondary); font-size:0.6em; font-weight:400;">針對秘書/行政</span></h2>
+    </div>
+    <div class="scenario-grid" style="margin-top: var(--element-gap);">
+      <div class="scenario-left">
+        <div class="card reveal">
+          <h3 style="color:var(--accent-magenta); font-size:clamp(0.8rem,1.6vw,1.1rem);">😤 日常痛點</h3>
+          <p style="font-size:var(--small-size); color:var(--text-secondary); line-height:1.5; margin-top:0.3em;">DAE 考試時手動為幾十位老師逐一製作通知書並轉 PDF，枯燥且易錯。</p>
+        </div>
+        <div class="io-row reveal">
+          <div class="io-item">
+            <div class="io-label input-label">📥 輸入</div>
+            <p>多位監考員考試排程的 Excel 總表</p>
+          </div>
+          <div class="io-item">
+            <div class="io-label output-label">📤 輸出</div>
+            <p>全體老師的專屬 PDF 監考通知書</p>
+          </div>
+        </div>
+        <div class="highlight-box reveal">
+          <p>⚡ <span class="key-point">觀眾看點：</span>半天的行政排版壓縮到 <span class="key-point neon-glow">10 秒</span>自動完成。<br/>📌 這批 PDF 等一下 Claude 接手發送！</p>
+        </div>
+      </div>
+      <div class="scenario-right">
+        <div class="prompt-block reveal" style="max-height: min(50vh, 320px);">
+請讀取以下 Excel 排班名單：
+C:\Users\kmksy\Desktop\HKIT\Demo_sharing\02_秘書_行政排班\01_總表
+
+每列考試行程中，『Invigilator 1』到『Invigilator 4』可能有多位監考員。
+請針對每一位有填寫名字的監考員，分別使用以下 Word 模板生成一份獨立通知：
+C:\Users\kmksy\Desktop\HKIT\Demo_sharing\02_秘書_行政排班\02_模板
+
+將姓名、科目、日期、地點填入對應欄位，另存為 PDF，統一存放至：
+C:\Users\kmksy\Desktop\HKIT\Demo_sharing\02_秘書_行政排班\03_待發送通知
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 7: Gmail 讀信 + 4象限分析
+     ========================================== -->
+<section class="slide content-slide" data-slide="5">
+  <div class="grid-bg"></div>
+  <span class="section-num">07</span>
+  <div class="slide-content">
+    <div class="slide-title-row reveal">
+      <span class="tag">實戰場景三</span>
+      <span class="tag tag-magenta">方向 A → 方向 B 接力</span>
+      <h2>Gmail 讀信 + 4象限分析</h2>
+    </div>
+    <div class="two-col" style="margin-top: var(--element-gap); gap: clamp(0.8rem,2vw,2rem);">
+      <!-- Step A -->
+      <div style="display:flex; flex-direction:column; gap: var(--element-gap);">
+        <div class="card reveal" style="border-color:rgba(255,0,170,0.2);">
+          <div style="display:flex; align-items:center; gap:0.4em; margin-bottom:0.3em;">
+            <span style="font-size:1.1em;">🖱️</span>
+            <span class="tag tag-magenta" style="margin-bottom:0;">Step 1 · 方向 A</span>
+          </div>
+          <h3 style="font-size:clamp(0.85rem,1.5vw,1.1rem); color:var(--accent-magenta); margin-bottom:0.3em;">瀏覽器讀信</h3>
+          <ul class="bullet-list">
+            <li>Claude in Chrome 打開 Gmail</li>
+            <li>逐封點開 → 讀取內容</li>
+            <li>輸出 ✅ / 📖 / ❌ 分類摘要</li>
+          </ul>
+        </div>
+        <div class="card reveal" style="border-color:rgba(0,255,204,0.2);">
+          <div style="display:flex; align-items:center; gap:0.4em; margin-bottom:0.3em;">
+            <span style="font-size:1.1em;">⚡</span>
+            <span class="tag" style="margin-bottom:0;">Step 2 · 分析</span>
+          </div>
+          <h3 style="font-size:clamp(0.85rem,1.5vw,1.1rem); color:var(--accent-cyan); margin-bottom:0.3em;">Eisenhower Matrix</h3>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.35em; margin-top:0.3em;">
+            <div style="background:rgba(255,60,60,0.12); border:1px solid rgba(255,60,60,0.3); border-radius:5px; padding:0.3em 0.5em; font-size:var(--small-size);">🔴 高重要＋高緊急</div>
+            <div style="background:rgba(255,200,0,0.1); border:1px solid rgba(255,200,0,0.3); border-radius:5px; padding:0.3em 0.5em; font-size:var(--small-size);">🟡 高重要＋低緊急</div>
+            <div style="background:rgba(0,100,255,0.1); border:1px solid rgba(0,100,255,0.3); border-radius:5px; padding:0.3em 0.5em; font-size:var(--small-size);">🔵 低重要＋高緊急</div>
+            <div style="background:rgba(100,100,100,0.15); border:1px solid rgba(100,100,100,0.3); border-radius:5px; padding:0.3em 0.5em; font-size:var(--small-size);">⚫ 低重要＋低緊急</div>
+          </div>
+        </div>
+      </div>
+      <!-- Prompt block -->
+      <div class="scenario-right">
+        <div class="prompt-block reveal" style="max-height: min(58vh, 360px);">
+【Step 1 — 先跑】
+請幫我讀取 Gmail Web 收件匣中過去 7 天內的郵件。
+逐封點開讀取，輸出摘要：
+
+[N] 寄件人：xxx  主旨：xxx  日期：xxx
+    摘要：（一句話）
+    建議：✅ 需要回覆 / 📖 已知悉 / ❌ 不適合 Agent
+
+
+【Step 2 — 摘要完成後再跑】
+根據剛才的收件匣摘要，
+用 Eisenhower Matrix（4象限）重新分類：
+
+🔴 高重要＋高緊急 → 今天必須處理
+🟡 高重要＋低緊急 → 本週計劃完成
+🔵 低重要＋高緊急 → 快速處理或委派
+⚫ 低重要＋低緊急 → 可忽略或刪除
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 8: 批量發送監考通知（接力流程）
+     ========================================== -->
+<section class="slide content-slide" data-slide="6">
+  <div class="grid-bg"></div>
+  <span class="section-num">08</span>
+  <div class="slide-content">
+    <div class="slide-title-row reveal">
+      <span class="tag">實戰場景四</span>
+      <span class="tag tag-magenta">AutoClaw ➜ Claude 接力</span>
+      <h2>批量發送監考通知</h2>
+    </div>
+    <div class="sop-container reveal-scale" style="margin-top: clamp(0.5rem,1.5vw,1.2rem);">
+      <div class="sop-step" style="border-color:rgba(255,0,170,0.25);">
+        <div class="step-number">01</div>
+        <div class="step-title" style="color:var(--accent-magenta);">🤖 AutoClaw</div>
+        <div class="step-desc">讀 Excel 排班表<br/>生成 <span style="color:var(--text-primary); font-weight:600;">36 份</span> 個人化 PDF</div>
+      </div>
+      <div style="display:flex; align-items:center; flex:0 0 auto; padding:0 0.3em;">
+        <span style="font-size:1.8rem; color:var(--accent-cyan); text-shadow: var(--glow-cyan);">→</span>
+      </div>
+      <div class="sop-step">
+        <div class="step-number">02</div>
+        <div class="step-title" style="color:var(--accent-cyan);">📂 Claude Desktop</div>
+        <div class="step-desc">掃描資料夾<br/>從<span style="color:var(--text-primary); font-weight:600;">檔名</span>提取老師姓名</div>
+      </div>
+      <div style="display:flex; align-items:center; flex:0 0 auto; padding:0 0.3em;">
+        <span style="font-size:1.8rem; color:var(--accent-cyan); text-shadow: var(--glow-cyan);">→</span>
+      </div>
+      <div class="sop-step">
+        <div class="step-number">03</div>
+        <div class="step-title" style="color:var(--accent-cyan);">📧 Gmail API Skill</div>
+        <div class="step-desc">展示草稿確認<br/>批量發送 + <span style="color:var(--text-primary); font-weight:600;">PDF 附件</span></div>
+      </div>
+    </div>
+    <div class="prompt-block reveal" style="margin-top: clamp(0.5rem,1.5vw,1rem); max-height: min(40vh, 240px);">
+掃描此資料夾的所有 PDF：
+C:\Users\kmksy\Desktop\HKIT\Demo_sharing\02_秘書_行政排班\03_待發送通知_test
+
+檔名格式為 序號_老師姓名_科目代碼.pdf，從檔名提取老師姓名和科目代碼。
+用 send-gmail-attachment skill 逐封發送，每封發送前展示草稿等我確認：
+
+- 收件人： kmkswork@gmail.com
+- 主旨：   Invigilation Duty Notice - [老師姓名] - [科目代碼]
+- 內文：   Dear [老師姓名],
+           Please find attached your invigilation duty notice for [科目代碼].
+           Best regards,
+           Examination Section, HKIT
+- 附件：   對應 PDF 的完整路徑
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 9: Human-in-the-Loop
+     ========================================== -->
+<section class="slide content-slide" data-slide="7">
+  <div class="grid-bg"></div>
+  <span class="section-num">09</span>
+  <div class="slide-content" style="align-items:center; text-align:center;">
+    <div class="slide-title-row reveal" style="text-align:center;">
+      <span class="tag">知識點 3</span>
+      <h2>Human-in-the-Loop</h2>
+      <p style="font-size:var(--body-size); color:var(--text-secondary); margin-top:0.3em;">AI 起草，人確認，才執行 — 你永遠在 loop 裡面</p>
+    </div>
+    <div style="display:flex; align-items:center; justify-content:center; gap:clamp(0.2rem,0.8vw,0.6rem); flex-wrap:nowrap; margin-top:var(--content-gap); max-width:100%;" class="reveal-scale">
+      <div class="sop-step" style="flex:1; min-width:0;">
+        <div class="arch-icon">💬</div>
+        <div class="step-title" style="font-size:clamp(0.75rem,1.4vw,1rem);">你的指令</div>
+      </div>
+      <span style="font-size:clamp(1rem,2vw,1.5rem); color:var(--accent-cyan); flex:0 0 auto;">→</span>
+      <div class="sop-step" style="flex:1; min-width:0;">
+        <div class="arch-icon">🤖</div>
+        <div class="step-title" style="font-size:clamp(0.75rem,1.4vw,1rem);">AI 分析</div>
+      </div>
+      <span style="font-size:clamp(1rem,2vw,1.5rem); color:var(--accent-cyan); flex:0 0 auto;">→</span>
+      <div class="sop-step" style="flex:1; min-width:0;">
+        <div class="arch-icon">📝</div>
+        <div class="step-title" style="font-size:clamp(0.75rem,1.4vw,1rem);">AI 起草</div>
+      </div>
+      <span style="font-size:clamp(1rem,2vw,1.5rem); color:var(--accent-magenta); font-weight:700; flex:0 0 auto;">→</span>
+      <div class="sop-step" style="flex:1; min-width:0; border-color:rgba(0,255,204,0.5); box-shadow: 0 0 25px rgba(0,255,204,0.15);">
+        <div class="arch-icon">👤</div>
+        <div class="step-title" style="color:var(--accent-cyan); font-size:clamp(0.75rem,1.4vw,1rem);">你確認</div>
+        <div class="step-desc" style="font-size:var(--small-size); color:var(--accent-cyan); opacity:0.8;">← 永遠在這裡</div>
+      </div>
+      <span style="font-size:clamp(1rem,2vw,1.5rem); color:var(--accent-cyan); flex:0 0 auto;">→</span>
+      <div class="sop-step" style="flex:1; min-width:0;">
+        <div class="arch-icon">✅</div>
+        <div class="step-title" style="font-size:clamp(0.75rem,1.4vw,1rem);">AI 執行</div>
+      </div>
+    </div>
+    <div class="two-col reveal" style="margin-top:var(--element-gap);">
+      <div class="highlight-box" style="background:rgba(0,255,204,0.06); border-color:rgba(0,255,204,0.2);">
+        <p>✅ <span class="key-point">適合：</span>確認出席、已知悉、發通知、提供標準資料</p>
+      </div>
+      <div class="highlight-box" style="background:rgba(255,0,170,0.06); border-color:rgba(255,0,170,0.2);">
+        <p>❌ <span style="color:var(--accent-magenta); font-weight:700;">不適合：</span>投訴、談判、需要情感判斷的情況</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 10: AI 的邊界
+     ========================================== -->
+<section class="slide content-slide" data-slide="8">
+  <div class="grid-bg"></div>
+  <span class="section-num">10</span>
+  <div class="slide-content">
+    <div class="slide-title-row reveal">
+      <span class="tag">知識點 4</span>
+      <h2>AI 懂得說 <span class="magenta-text">「不」</span></h2>
+      <p style="font-size:var(--body-size); color:var(--text-secondary); margin-top:0.3em;">好的 Agent 不只是會做事，還要知道什麼<span class="magenta-text">不應該</span>做</p>
+    </div>
+    <div class="three-col" style="margin-top: var(--content-gap);">
+      <div class="card card-glow reveal" style="border-color:rgba(255,0,170,0.2);">
+        <div style="font-size:1.8em; margin-bottom:0.3em;">📋</div>
+        <h3 style="font-size:clamp(0.85rem,1.5vw,1.1rem); color:var(--accent-magenta);">課程改革意見</h3>
+        <p style="font-size:var(--small-size); color:var(--text-secondary); line-height:1.5; margin-top:0.3em;">涉及你的專業判斷和立場，AI 不了解你的價值觀和處境。</p>
+        <div style="margin-top:0.5em; font-size:var(--small-size); color:rgba(255,0,170,0.8); font-weight:600;">❌ AI 不應代你決定</div>
+      </div>
+      <div class="card card-glow reveal" style="border-color:rgba(255,0,170,0.2);">
+        <div style="font-size:1.8em; margin-bottom:0.3em;">⚠️</div>
+        <h3 style="font-size:clamp(0.85rem,1.5vw,1.1rem); color:var(--accent-magenta);">學生投訴</h3>
+        <p style="font-size:var(--small-size); color:var(--text-secondary); line-height:1.5; margin-top:0.3em;">涉及紀律程序，必須由人親自處理，需要情感溝通與判斷。</p>
+        <div style="margin-top:0.5em; font-size:var(--small-size); color:rgba(255,0,170,0.8); font-weight:600;">❌ 必須人處理</div>
+      </div>
+      <div class="card card-glow reveal" style="border-color:rgba(255,0,170,0.2);">
+        <div style="font-size:1.8em; margin-bottom:0.3em;">🤝</div>
+        <h3 style="font-size:clamp(0.85rem,1.5vw,1.1rem); color:var(--accent-magenta);">合約續約談判</h3>
+        <p style="font-size:var(--small-size); color:var(--text-secondary); line-height:1.5; margin-top:0.3em;">複雜協商涉及薪酬、條款，AI 不應代你做出任何承諾。</p>
+        <div style="margin-top:0.5em; font-size:var(--small-size); color:rgba(255,0,170,0.8); font-weight:600;">❌ 高決策成本</div>
+      </div>
+    </div>
+    <div class="highlight-box reveal" style="margin-top: var(--element-gap);">
+      <p style="text-align:center;">🎯 <span class="key-point">AI 處理低決策成本的事，高決策成本的事由你來。</span>這就是 Human-in-the-Loop 的精髓。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 11: 高階教學素材轉譯
+     ========================================== -->
+<section class="slide content-slide" data-slide="10">
+  <div class="grid-bg"></div>
+  <span class="section-num">11</span>
+  <div class="slide-content">
+    <div class="slide-title-row reveal">
+      <span class="tag">實戰場景三</span>
+      <h2>高階教學素材轉譯 <span style="color:var(--text-secondary); font-size:0.6em; font-weight:400;">針對老師</span></h2>
+    </div>
+    <div class="scenario-grid" style="margin-top: var(--element-gap);">
+      <div class="scenario-left">
+        <div class="card reveal">
+          <h3 style="color:var(--accent-magenta); font-size:clamp(0.8rem,1.6vw,1.1rem);">😤 日常痛點</h3>
+          <p style="font-size:var(--small-size); color:var(--text-secondary); line-height:1.5; margin-top:0.3em;">製作專業電路圖等工程圖表，需耗費大量時間學習排版軟體。</p>
+        </div>
+        <div class="io-row reveal">
+          <div class="io-item">
+            <div class="io-label input-label">📥 輸入</div>
+            <p>講解「串聯 R-L 電路」的純文字 Word 教案</p>
+          </div>
+          <div class="io-item">
+            <div class="io-label output-label">📤 輸出</div>
+            <p>可編譯的 LaTeX circuitikz 電路圖代碼</p>
+          </div>
+        </div>
+        <div class="highlight-box reveal">
+          <p>🧠 <span class="key-point">觀眾看點：</span>AI 不只是文書助理，更是能理解專業領域並生成工程代碼的<span class="key-point neon-glow">高階助教</span>。</p>
+        </div>
+      </div>
+      <div class="scenario-right">
+        <div class="prompt-block reveal" style="max-height: min(50vh, 320px);">
+請讀取以下資料夾中的 Word 教材檔：
+C:\Users\kmksy\Desktop\HKIT\Demo_sharing\03_老師_教案提煉\Input_原始教案
+
+根據文件中提到的「串聯 R-L 電路」概念，撰寫一段完整、
+標準且可直接編譯的 LaTeX circuitikz 程式碼。
+要求包含交流電壓源、串聯的電阻 (R) 和電感 (L)，
+並加上適當的標籤與節點。
+
+請將程式碼儲存為純文字檔 RL_Circuit_Code.tex，存放至：
+C:\Users\kmksy\Desktop\HKIT\Demo_sharing\03_老師_教案提煉\Output_教材包
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 12: 如何開始？
+     ========================================== -->
+<section class="slide content-slide" data-slide="11">
+  <div class="grid-bg"></div>
+  <span class="section-num">12</span>
+  <div class="slide-content" style="align-items:center; text-align:center;">
+    <div class="slide-title-row reveal" style="text-align:center;">
+      <span class="tag">🧰 你的桌面 AI 工具箱</span>
+      <h2>如何開始？</h2>
+      <p style="font-size:var(--body-size); color:var(--text-secondary); margin-top:0.3em;">開箱即用的 Demo_sharing 標準化資料夾結構</p>
+    </div>
+    <div class="sop-container reveal-scale">
+      <div class="sop-step">
+        <div class="step-number">01</div>
+        <div class="step-title">📥 放入檔案</div>
+        <div class="step-desc">把檔案丟入<br/><span class="accent-text" style="font-weight:600;">Input</span> 資料夾</div>
+      </div>
+      <div class="sop-step">
+        <div class="step-number">02</div>
+        <div class="step-title">📋 複製指令</div>
+        <div class="step-desc">複製貼上專屬指令<br/><span class="accent-text" style="font-weight:600;">(Prompt)</span></div>
+      </div>
+      <div class="sop-step">
+        <div class="step-number">03</div>
+        <div class="step-title">📂 收件</div>
+        <div class="step-desc">到 <span class="accent-text" style="font-weight:600;">Output</span> 資料夾收件</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 13: 架構揭秘
+     ========================================== -->
+<section class="slide content-slide" data-slide="12">
+  <div class="grid-bg"></div>
+  <span class="section-num">13</span>
+  <div class="slide-content" style="align-items:center;">
+    <div class="slide-title-row reveal" style="text-align:center; width:100%;">
+      <span class="tag">🔮 架構揭秘</span>
+      <h2>這些魔法是如何實現的？</h2>
+      <p style="font-size:var(--body-size); color:var(--text-secondary); margin-top:0.3em;">用語意來寫程式 — Vibe Coding</p>
+    </div>
+    <div class="two-col reveal-scale" style="margin-top: clamp(0.8rem, 2vw, 2rem); max-width: min(95vw, 1100px);">
+      <div class="arch-card">
+        <div class="arch-icon">🛠️</div>
+        <div class="arch-title">Skills — 賦予雙手</div>
+        <p class="arch-desc">我們為它裝上「讀取 Excel」和「操作 Word」的技能模組，讓它能真實觸碰你的檔案。</p>
+      </div>
+      <div class="arch-card">
+        <div class="arch-icon">⏰</div>
+        <div class="arch-title">Cron Jobs — 植入生理時鐘</div>
+        <p class="arch-desc">未來，我們甚至可以設定排程。例如：「每週五下午 5 點，自動掃描待處理單據資料夾」。</p>
+      </div>
+    </div>
+    <p class="vibe-coding-note reveal">💡 不需要寫一行程式碼 — 用自然語言就能操控一切</p>
+  </div>
+</section>
+
+<!-- ==========================================
+     JAVASCRIPT: PRESENTATION CONTROLLER
+     ========================================== -->
+<script>
+/* === Particle System === */
+(function() {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  const PARTICLE_COUNT = 60;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class Particle {
+    constructor() {
+      this.reset();
+    }
+    reset() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.size = Math.random() * 2 + 0.5;
+      this.speedX = (Math.random() - 0.5) * 0.3;
+      this.speedY = (Math.random() - 0.5) * 0.3;
+      this.opacity = Math.random() * 0.5 + 0.1;
+      this.color = Math.random() > 0.7 ? '255,0,170' : '0,255,204';
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+      if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + this.color + ',' + this.opacity + ')';
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push(new Particle());
+  }
+
+  function drawLines() {
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = 'rgba(0,255,204,' + (0.06 * (1 - dist / 150)) + ')';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    drawLines();
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+/* === Slide Presentation Controller === */
+class SlidePresentation {
+  constructor() {
+    this.slides = document.querySelectorAll('.slide');
+    this.currentSlide = 0;
+    this.navDotsContainer = document.getElementById('navDots');
+    this.progressBar = document.getElementById('progressBar');
+    this.isScrolling = false;
+
+    this.setupIntersectionObserver();
+    this.setupKeyboardNav();
+    this.setupTouchNav();
+    this.setupWheelNav();
+    this.setupNavDots();
+    this.updateProgress();
+  }
+
+  setupIntersectionObserver() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          const idx = Array.from(this.slides).indexOf(entry.target);
+          if (idx !== -1) {
+            this.currentSlide = idx;
+            this.updateNavDots();
+            this.updateProgress();
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    this.slides.forEach(slide => observer.observe(slide));
+  }
+
+  setupKeyboardNav() {
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        this.goTo(this.currentSlide + 1);
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        this.goTo(this.currentSlide - 1);
+      }
+    });
+  }
+
+  setupTouchNav() {
+    let startY = 0;
+    document.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+      const diff = startY - e.changedTouches[0].clientY;
+      if (Math.abs(diff) > 50) {
+        diff > 0 ? this.goTo(this.currentSlide + 1) : this.goTo(this.currentSlide - 1);
+      }
+    }, { passive: true });
+  }
+
+  setupWheelNav() {
+    document.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (this.isScrolling) return;
+      this.isScrolling = true;
+      setTimeout(() => { this.isScrolling = false; }, 600);
+      if (e.deltaY > 0) this.goTo(this.currentSlide + 1);
+      else this.goTo(this.currentSlide - 1);
+    }, { passive: false });
+  }
+
+  goTo(index) {
+    if (index < 0 || index >= this.slides.length) return;
+    this.slides[index].scrollIntoView({ behavior: 'smooth' });
+  }
+
+  setupNavDots() {
+    this.navDotsContainer.innerHTML = '';
+    this.slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      dot.setAttribute('aria-label', 'Slide ' + (i + 1));
+      dot.addEventListener('click', () => this.goTo(i));
+      this.navDotsContainer.appendChild(dot);
+    });
+  }
+
+  updateNavDots() {
+    const dots = this.navDotsContainer.querySelectorAll('.nav-dot');
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === this.currentSlide);
+    });
+  }
+
+  updateProgress() {
+    const pct = ((this.currentSlide + 1) / this.slides.length) * 100;
+    this.progressBar.style.width = pct + '%';
+  }
+}
+
+new SlidePresentation();
+</script>
+</body>
+</html>
